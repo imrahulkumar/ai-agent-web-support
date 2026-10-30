@@ -71,7 +71,7 @@ function chunkText(text, chunkSize = 500) {
 async function generateVectorEmbeddings({text}) {
 
     const embedding = await openai.embeddings.create({
-        model: "text-embedding-3-small",
+        model: "gemini-embedding-001",
         input: text,
         encoding_format: "float",
     });
@@ -97,8 +97,8 @@ async function chat(question = '') {
    const questionEmbedding = await generateVectorEmbeddings({ text: question });
     const collection = await chromaClient.getOrCreateCollection({ name: WEB_COLLECTION });
    const collectionResult = await  collection.query({
-       query_embeddings: [questionEmbedding],
-       n_results: 5
+       queryEmbeddings: [questionEmbedding],
+       nResults: 5
    });
 
    const body  = collectionResult.metadatas[0].map(metadata => metadata.body).filter(e => e.trim() || !!e);
@@ -106,6 +106,7 @@ async function chat(question = '') {
    const urls = collectionResult.metadatas[0].map(metadata => metadata.url).filter(e => e.trim() || !!e);
 
    const response = await openai.chat.completions.create({
+       model: "gemini-3.8-flash",
        messages: [
            { role: "system", content: `You are an AI support agent expert in providing support to user on behalf a webpage. Given the context about page content, reply the user accordingly` },
            { role: "user", 
